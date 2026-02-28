@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagram Pencar Interaktif</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+*{box-sizing:border-box;}
+
+body{
+    margin:0;
+    font-family:'Segoe UI',sans-serif;
+    background:linear-gradient(135deg,#eef2ff,#f8fafc);
+}
+
+.container{
+    display:flex;
+    gap:25px;
+    padding:25px;
+    max-width:1300px;
+    margin:auto;
+}
+
+.panel{
+    background:white;
+    border-radius:14px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+    padding:20px;
+}
+
+.left{width:340px;}
+.right{flex:1; display:flex; flex-direction:column;}
+
+h2{margin-top:0; font-size:18px;}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-bottom:15px;
+}
+
+th{
+    background:#f1f5f9;
+    padding:8px;
+    font-size:13px;
+}
+
+td{padding:6px;}
+
+input[type="number"], input[type="color"]{
+    width:100%;
+    padding:6px;
+    border:1px solid #ddd;
+    border-radius:6px;
+}
+
+.settings label{
+    font-size:13px;
+    display:block;
+    margin-top:8px;
+}
+
+.settings input[type="range"]{
+    width:100%;
+}
+
+button{
+    padding:8px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:13px;
+    margin-top:8px;
+}
+
+.btn-primary{
+    background:#2563eb;
+    color:white;
+}
+
+.btn-green{
+    background:#10b981;
+    color:white;
+}
+
+.chart-container{
+    flex:1;
+    min-height:450px;
+}
+
+#equation{
+    margin-top:10px;
+    font-size:14px;
+    font-weight:500;
+    color:#334155;
+}
+
+@media(max-width:900px){
+    .container{flex-direction:column;}
+    .left{width:100%;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="panel left">
+<h2>Input Data</h2>
+
+<table id="dataTable">
+<thead>
+<tr><th>X</th><th>Y</th></tr>
+</thead>
+<tbody>
+<tr>
+<td><input type="number" step="any"></td>
+<td><input type="number" step="any"></td>
+</tr>
+</tbody>
+</table>
+
+<button class="btn-green" onclick="addRow()">Tambah Data</button>
+<button class="btn-primary" onclick="generateChart()">Tampilkan Diagram</button>
+
+<hr>
+
+<h2>Pengaturan Tampilan</h2>
+
+<div class="settings">
+
+<label>Ukuran Titik</label>
+<input type="range" id="pointSize" min="3" max="15" value="6">
+
+<label>Warna Titik</label>
+<input type="color" id="pointColor" value="#2563eb">
+
+<label>Warna Garis Regresi</label>
+<input type="color" id="lineColor" value="#ef4444">
+
+<label>Background Grafik</label>
+<input type="color" id="bgColor" value="#ffffff">
+
+<label><input type="checkbox" id="toggleLine" checked> Tampilkan Garis Regresi</label>
+<label><input type="checkbox" id="toggleLabels"> Tampilkan Label Data</label>
+
+</div>
+
+</div>
+
+<div class="panel right">
+<h2>Diagram Pencar & Regresi</h2>
+<div class="chart-container">
+<canvas id="scatterChart"></canvas>
+</div>
+<div id="equation"></div>
+</div>
+
+</div>
+
+<script>
+
+let chartInstance=null;
+
+function addRow(){
+    const table=document.querySelector("#dataTable tbody");
+    const row=table.insertRow();
+    row.innerHTML=`
+        <td><input type="number" step="any"></td>
+        <td><input type="number" step="any"></td>
+    `;
+}
+
+function generateChart(){
+
+    const rows=document.querySelectorAll("#dataTable tbody tr");
+    let data=[];
+
+    rows.forEach(row=>{
+        const x=parseFloat(row.cells[0].children[0].value);
+        const y=parseFloat(row.cells[1].children[0].value);
+        if(!isNaN(x)&&!isNaN(y)){
+            data.push({x:x,y:y});
+        }
+    });
+
+    if(data.length<2){
+        alert("Minimal 2 data diperlukan");
+        return;
+    }
+
+    const n=data.length;
+    let sumX=0,sumY=0,sumXY=0,sumXX=0;
+
+    data.forEach(p=>{
+        sumX+=p.x;
+        sumY+=p.y;
+        sumXY+=p.x*p.y;
+        sumXX+=p.x*p.x;
+    });
+
+    const slope=(n*sumXY-sumX*sumY)/(n*sumXX-sumX*sumX);
+    const intercept=(sumY-slope*sumX)/n;
+
+    const minX=Math.min(...data.map(p=>p.x));
+    const maxX=Math.max(...data.map(p=>p.x));
+
+    const regressionLine=[
+        {x:minX,y:slope*minX+intercept},
+        {x:maxX,y:slope*maxX+intercept}
+    ];
+
+    const pointSize=document.getElementById("pointSize").value;
+    const pointColor=document.getElementById("pointColor").value;
+    const lineColor=document.getElementById("lineColor").value;
+    const bgColor=document.getElementById("bgColor").value;
+    const showLine=document.getElementById("toggleLine").checked;
+    const showLabels=document.getElementById("toggleLabels").checked;
+
+    if(chartInstance){
+        chartInstance.destroy();
+    }
+
+    const ctx=document.getElementById('scatterChart').getContext("2d");
+
+    chartInstance=new Chart(ctx,{
+        type:'scatter',
+        data:{
+            datasets:[
+                {
+                    label:'Data',
+                    data:data,
+                    backgroundColor:pointColor,
+                    pointRadius:pointSize
+                },
+                ...(showLine?[{
+                    label:'Garis Regresi',
+                    data:regressionLine,
+                    type:'line',
+                    borderColor:lineColor,
+                    borderWidth:2,
+                    fill:false
+                }]:[])
+            ]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{
+                tooltip:{enabled:true}
+            },
+            scales:{
+                x:{type:'linear', position:'bottom'},
+                y:{}
+            }
+        },
+        plugins:[{
+            id:'customBackground',
+            beforeDraw:(chart)=>{
+                const {ctx,chartArea}=chart;
+                ctx.save();
+                ctx.fillStyle=bgColor;
+                ctx.fillRect(chartArea.left,chartArea.top,
+                             chartArea.right-chartArea.left,
+                             chartArea.bottom-chartArea.top);
+                ctx.restore();
+            }
+        }]
+    });
+
+    document.getElementById("equation").innerHTML=
+        "Persamaan Regresi: y = "+
+        slope.toFixed(4)+"x + "+intercept.toFixed(4);
+}
+
+</script>
+
+</body>
+</html>
