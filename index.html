@@ -3,18 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Diagram Pencar Interaktif</title>
+<title>Scatter Regression Studio</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-*{box-sizing:border-box;}
-
+*{box-sizing:border-box}
 body{
     margin:0;
-    font-family:'Segoe UI',sans-serif;
-    background:linear-gradient(135deg,#eef2ff,#f8fafc);
+    font-family:'Inter','Segoe UI',sans-serif;
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    transition:.3s;
+    color:#1e293b;
 }
-
+.dark{
+    background:linear-gradient(135deg,#0f172a,#1e293b);
+    color:white;
+}
+header{
+    text-align:center;
+    padding:20px;
+    color:white;
+    font-size:22px;
+    font-weight:600;
+}
+.toggle-dark{
+    position:absolute;
+    top:20px;
+    right:30px;
+    background:white;
+    padding:6px 12px;
+    border-radius:20px;
+    cursor:pointer;
+    font-size:12px;
+}
+.dark .toggle-dark{
+    background:#334155;
+    color:white;
+}
 .container{
     display:flex;
     gap:25px;
@@ -22,89 +47,80 @@ body{
     max-width:1300px;
     margin:auto;
 }
-
 .panel{
-    background:white;
-    border-radius:14px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+    background:rgba(255,255,255,0.92);
+    backdrop-filter:blur(10px);
+    border-radius:16px;
     padding:20px;
+    box-shadow:0 15px 35px rgba(0,0,0,0.15);
 }
-
-.left{width:340px;}
-.right{flex:1; display:flex; flex-direction:column;}
-
-h2{margin-top:0; font-size:18px;}
-
+.dark .panel{
+    background:rgba(30,41,59,0.92);
+}
+.left{width:360px}
+.right{flex:1;display:flex;flex-direction:column}
+h2{margin-top:0;font-size:17px}
 table{
     width:100%;
     border-collapse:collapse;
-    margin-bottom:15px;
+    margin-bottom:10px;
 }
-
 th{
     background:#f1f5f9;
     padding:8px;
-    font-size:13px;
+    font-size:12px;
 }
-
-td{padding:6px;}
-
-input[type="number"], input[type="color"]{
+.dark th{background:#334155}
+td{padding:6px}
+input{
     width:100%;
     padding:6px;
-    border:1px solid #ddd;
-    border-radius:6px;
-}
-
-.settings label{
-    font-size:13px;
-    display:block;
-    margin-top:8px;
-}
-
-.settings input[type="range"]{
-    width:100%;
-}
-
-button{
-    padding:8px;
-    border:none;
     border-radius:8px;
-    cursor:pointer;
+    border:1px solid #ccc;
     font-size:13px;
+}
+button{
+    width:100%;
+    padding:9px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
     margin-top:8px;
+    font-weight:500;
 }
-
-.btn-primary{
-    background:#2563eb;
-    color:white;
+.btn-green{background:#10b981;color:white}
+.btn-primary{background:#2563eb;color:white}
+.btn-reset{background:#ef4444;color:white}
+.stats{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:10px;
 }
-
-.btn-green{
-    background:#10b981;
-    color:white;
+.stat-box{
+    background:rgba(0,0,0,0.05);
+    padding:10px;
+    border-radius:10px;
+    font-size:13px;
 }
-
+.dark .stat-box{
+    background:rgba(255,255,255,0.1);
+}
 .chart-container{
     flex:1;
     min-height:450px;
 }
-
-#equation{
-    margin-top:10px;
-    font-size:14px;
-    font-weight:500;
-    color:#334155;
-}
-
 @media(max-width:900px){
-    .container{flex-direction:column;}
-    .left{width:100%;}
+    .container{flex-direction:column}
+    .left{width:100%}
 }
 </style>
 </head>
 
 <body>
+
+<header>📊 Scatter Regression Studio</header>
+<div class="toggle-dark" onclick="toggleDark()">🌙 Dark Mode</div>
 
 <div class="container">
 
@@ -125,38 +141,25 @@ button{
 
 <button class="btn-green" onclick="addRow()">Tambah Data</button>
 <button class="btn-primary" onclick="generateChart()">Tampilkan Diagram</button>
+<button class="btn-reset" onclick="resetAll()">Reset</button>
 
-<hr>
-
-<h2>Pengaturan Tampilan</h2>
-
-<div class="settings">
-
-<label>Ukuran Titik</label>
-<input type="range" id="pointSize" min="3" max="15" value="6">
-
-<label>Warna Titik</label>
-<input type="color" id="pointColor" value="#2563eb">
-
-<label>Warna Garis Regresi</label>
-<input type="color" id="lineColor" value="#ef4444">
-
-<label>Background Grafik</label>
-<input type="color" id="bgColor" value="#ffffff">
-
-<label><input type="checkbox" id="toggleLine" checked> Tampilkan Garis Regresi</label>
-<label><input type="checkbox" id="toggleLabels"> Tampilkan Label Data</label>
-
+<div class="stats">
+<div class="stat-box">Data: <span id="count">0</span></div>
+<div class="stat-box">Slope: <span id="slope">-</span></div>
+<div class="stat-box">Intercept: <span id="intercept">-</span></div>
+<div class="stat-box">R²: <span id="r2">-</span></div>
+<div class="stat-box" style="grid-column:1/3;">
+Persamaan: <span id="equation">-</span>
+</div>
 </div>
 
 </div>
 
 <div class="panel right">
-<h2>Diagram Pencar & Regresi</h2>
+<h2>Visualisasi</h2>
 <div class="chart-container">
 <canvas id="scatterChart"></canvas>
 </div>
-<div id="equation"></div>
 </div>
 
 </div>
@@ -164,14 +167,30 @@ button{
 <script>
 
 let chartInstance=null;
+let lastData=null;
+
+function toggleDark(){
+    document.body.classList.toggle("dark");
+    if(lastData) generateChart(); // re-render supaya warna berubah
+}
 
 function addRow(){
-    const table=document.querySelector("#dataTable tbody");
-    const row=table.insertRow();
-    row.innerHTML=`
-        <td><input type="number" step="any"></td>
-        <td><input type="number" step="any"></td>
-    `;
+    const row=document.querySelector("#dataTable tbody").insertRow();
+    row.innerHTML=`<td><input type="number"></td>
+                   <td><input type="number"></td>`;
+}
+
+function resetAll(){
+    document.querySelector("#dataTable tbody").innerHTML=
+    `<tr><td><input type="number"></td>
+         <td><input type="number"></td></tr>`;
+    if(chartInstance) chartInstance.destroy();
+    document.getElementById("count").innerText=0;
+    document.getElementById("slope").innerText="-";
+    document.getElementById("intercept").innerText="-";
+    document.getElementById("r2").innerText="-";
+    document.getElementById("equation").innerText="-";
+    lastData=null;
 }
 
 function generateChart(){
@@ -179,12 +198,10 @@ function generateChart(){
     const rows=document.querySelectorAll("#dataTable tbody tr");
     let data=[];
 
-    rows.forEach(row=>{
-        const x=parseFloat(row.cells[0].children[0].value);
-        const y=parseFloat(row.cells[1].children[0].value);
-        if(!isNaN(x)&&!isNaN(y)){
-            data.push({x:x,y:y});
-        }
+    rows.forEach(r=>{
+        const x=parseFloat(r.cells[0].children[0].value);
+        const y=parseFloat(r.cells[1].children[0].value);
+        if(!isNaN(x)&&!isNaN(y)) data.push({x,y});
     });
 
     if(data.length<2){
@@ -192,88 +209,94 @@ function generateChart(){
         return;
     }
 
+    lastData=data;
+
     const n=data.length;
-    let sumX=0,sumY=0,sumXY=0,sumXX=0;
+    let sumX=0,sumY=0,sumXY=0,sumXX=0,sumYY=0;
 
     data.forEach(p=>{
         sumX+=p.x;
         sumY+=p.y;
         sumXY+=p.x*p.y;
         sumXX+=p.x*p.x;
+        sumYY+=p.y*p.y;
     });
 
     const slope=(n*sumXY-sumX*sumY)/(n*sumXX-sumX*sumX);
     const intercept=(sumY-slope*sumX)/n;
 
+    const r2=Math.pow((n*sumXY-sumX*sumY)/
+        Math.sqrt((n*sumXX-sumX*sumX)*(n*sumYY-sumY*sumY)),2);
+
+    document.getElementById("count").innerText=n;
+    document.getElementById("slope").innerText=slope.toFixed(4);
+    document.getElementById("intercept").innerText=intercept.toFixed(4);
+    document.getElementById("r2").innerText=r2.toFixed(4);
+    document.getElementById("equation").innerText=
+        "ŷ = "+slope.toFixed(4)+"X + "+intercept.toFixed(4);
+
     const minX=Math.min(...data.map(p=>p.x));
     const maxX=Math.max(...data.map(p=>p.x));
+    const minY=Math.min(...data.map(p=>p.y));
+    const maxY=Math.max(...data.map(p=>p.y));
+    const padding=(maxY-minY)*0.1 || 1;
 
-    const regressionLine=[
+    const regression=[
         {x:minX,y:slope*minX+intercept},
         {x:maxX,y:slope*maxX+intercept}
     ];
 
-    const pointSize=document.getElementById("pointSize").value;
-    const pointColor=document.getElementById("pointColor").value;
-    const lineColor=document.getElementById("lineColor").value;
-    const bgColor=document.getElementById("bgColor").value;
-    const showLine=document.getElementById("toggleLine").checked;
-    const showLabels=document.getElementById("toggleLabels").checked;
+    if(chartInstance) chartInstance.destroy();
 
-    if(chartInstance){
-        chartInstance.destroy();
-    }
+    const isDark=document.body.classList.contains("dark");
 
-    const ctx=document.getElementById('scatterChart').getContext("2d");
-
-    chartInstance=new Chart(ctx,{
+    chartInstance=new Chart(document.getElementById("scatterChart"),{
         type:'scatter',
         data:{
             datasets:[
                 {
                     label:'Data',
                     data:data,
-                    backgroundColor:pointColor,
-                    pointRadius:pointSize
+                    backgroundColor:'#3b82f6',
+                    pointRadius:6
                 },
-                ...(showLine?[{
-                    label:'Garis Regresi',
-                    data:regressionLine,
+                {
+                    label:'Regresi',
+                    data:regression,
                     type:'line',
-                    borderColor:lineColor,
+                    borderColor:'#ef4444',
                     borderWidth:2,
                     fill:false
-                }]:[])
+                }
             ]
         },
         options:{
             responsive:true,
             maintainAspectRatio:false,
-            plugins:{
-                tooltip:{enabled:true}
-            },
             scales:{
-                x:{type:'linear', position:'bottom'},
-                y:{}
+                x:{
+                    type:'linear',
+                    position:'bottom',
+                    ticks:{color:"#ffffff"},
+                    title:{display:true,text:"X",color:"#ffffff"},
+                    grid:{color:isDark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.05)'}
+                },
+                y:{
+                    min:minY-padding,
+                    max:maxY+padding,
+                    ticks:{color:"#ffffff"},
+                    title:{display:true,text:"Y",color:"#ffffff"},
+                    grid:{color:isDark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.05)'}
+                }
+            },
+            plugins:{
+                legend:{
+                    labels:{color:"#ffffff"}
+                }
             }
-        },
-        plugins:[{
-            id:'customBackground',
-            beforeDraw:(chart)=>{
-                const {ctx,chartArea}=chart;
-                ctx.save();
-                ctx.fillStyle=bgColor;
-                ctx.fillRect(chartArea.left,chartArea.top,
-                             chartArea.right-chartArea.left,
-                             chartArea.bottom-chartArea.top);
-                ctx.restore();
-            }
-        }]
+        }
     });
 
-    document.getElementById("equation").innerHTML=
-        "Persamaan Regresi: y = "+
-        slope.toFixed(4)+"x + "+intercept.toFixed(4);
 }
 
 </script>
