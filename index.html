@@ -171,7 +171,7 @@ let lastData=null;
 
 function toggleDark(){
     document.body.classList.toggle("dark");
-    if(lastData) generateChart(); // re-render supaya warna berubah
+    if(lastData) generateChart();
 }
 
 function addRow(){
@@ -211,6 +211,10 @@ function generateChart(){
 
     lastData=data;
 
+    const isDark=document.body.classList.contains("dark");
+    const axisColor=isDark ? "#ffffff" : "#1e293b";
+    const gridColor=isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)";
+
     const n=data.length;
     let sumX=0,sumY=0,sumXY=0,sumXX=0,sumYY=0;
 
@@ -224,7 +228,6 @@ function generateChart(){
 
     const slope=(n*sumXY-sumX*sumY)/(n*sumXX-sumX*sumX);
     const intercept=(sumY-slope*sumX)/n;
-
     const r2=Math.pow((n*sumXY-sumX*sumY)/
         Math.sqrt((n*sumXX-sumX*sumX)*(n*sumYY-sumY*sumY)),2);
 
@@ -247,8 +250,6 @@ function generateChart(){
     ];
 
     if(chartInstance) chartInstance.destroy();
-
-    const isDark=document.body.classList.contains("dark");
 
     chartInstance=new Chart(document.getElementById("scatterChart"),{
         type:'scatter',
@@ -277,21 +278,21 @@ function generateChart(){
                 x:{
                     type:'linear',
                     position:'bottom',
-                    ticks:{color:"#ffffff"},
-                    title:{display:true,text:"X",color:"#ffffff"},
-                    grid:{color:isDark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.05)'}
+                    ticks:{color:axisColor},
+                    title:{display:true,text:"X",color:axisColor},
+                    grid:{color:gridColor}
                 },
                 y:{
                     min:minY-padding,
                     max:maxY+padding,
-                    ticks:{color:"#ffffff"},
-                    title:{display:true,text:"Y",color:"#ffffff"},
-                    grid:{color:isDark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.05)'}
+                    ticks:{color:axisColor},
+                    title:{display:true,text:"Y",color:axisColor},
+                    grid:{color:gridColor}
                 }
             },
             plugins:{
                 legend:{
-                    labels:{color:"#ffffff"}
+                    labels:{color:axisColor}
                 }
             }
         }
