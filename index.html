@@ -33,6 +33,23 @@
             padding: 20px 25px;
             color: white;
         }
+        .header-left{
+    display:flex;
+    flex-direction:column;
+}
+
+.header-title{
+    font-size:28px;
+    font-weight:600;
+    color:white;
+}
+
+.header-author{
+    font-size:14px;
+    opacity:0.85;
+    margin-top:4px;
+    color:white;
+}
 
         .toggle-dark {
             background: white;
@@ -203,12 +220,13 @@
 
 <body>
 
-    <header>
-        <div>
-            <h2>Scatter Regression Studio</h2>
-        </div>
-        <div class="toggle-dark" onclick="toggleDark()">🌙 Dark Mode</div>
-    </header>
+   <header>
+    <div class="header-left">
+        <div class="header-title">Scatter Regression Studio</div>
+        <div class="header-author">By Wahyu Wijayanti, S.Pd., M.Pd.</div>
+    </div>
+    <div class="toggle-dark" onclick="toggleDark()">🌙 Dark Mode</div>
+</header>
 
     <div class="container">
 
