@@ -20,11 +20,42 @@ body{
     color:white;
 }
 header{
-    text-align:center;
-    padding:20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 25px;
     color:white;
+    flex-wrap:wrap;
+}
+
+.header-left{
+    display:flex;
+    flex-direction:column;
+}
+
+.header-title{
     font-size:22px;
     font-weight:600;
+}
+
+.header-sub{
+    font-size:13px;
+    opacity:0.9;
+    margin-top:4px;
+}
+
+.toggle-dark{
+    background:white;
+    padding:6px 14px;
+    border-radius:20px;
+    cursor:pointer;
+    font-size:12px;
+    font-weight:500;
+}
+
+.dark .toggle-dark{
+    background:#334155;
+    color:white;
 }
 .toggle-dark{
     position:absolute;
@@ -119,7 +150,13 @@ button{
 
 <body>
 
-<header>📊 Scatter Regression Studio</header>
+<header>
+    <div class="header-left">
+        <div class="header-title">Scatter Regression Studio</div>
+        <div class="header-sub">By Wahyu Wijayanti</div>
+    </div>
+    <div class="toggle-dark" onclick="toggleDark()">🌙 Dark Mode</div>
+</header>
 <div class="toggle-dark" onclick="toggleDark()">🌙 Dark Mode</div>
 
 <div class="container">
@@ -131,12 +168,7 @@ button{
 <thead>
 <tr><th>X</th><th>Y</th></tr>
 </thead>
-<tbody>
-<tr>
-<td><input type="number" step="any"></td>
-<td><input type="number" step="any"></td>
-</tr>
-</tbody>
+<tbody></tbody>
 </table>
 
 <button class="btn-green" onclick="addRow()">Tambah Data</button>
@@ -168,7 +200,18 @@ Persamaan: <span id="equation">-</span>
 
 let chartInstance=null;
 let lastData=null;
+function createInitialRows(){
+    const tbody = document.querySelector("#dataTable tbody");
+    tbody.innerHTML = "";
 
+    for(let i=0; i<10; i++){
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td><input type="number" step="any"></td>
+            <td><input type="number" step="any"></td>
+        `;
+    }
+}
 function toggleDark(){
     document.body.classList.toggle("dark");
     if(lastData) generateChart();
@@ -181,10 +224,10 @@ function addRow(){
 }
 
 function resetAll(){
-    document.querySelector("#dataTable tbody").innerHTML=
-    `<tr><td><input type="number"></td>
-         <td><input type="number"></td></tr>`;
+    createInitialRows();
+
     if(chartInstance) chartInstance.destroy();
+
     document.getElementById("count").innerText=0;
     document.getElementById("slope").innerText="-";
     document.getElementById("intercept").innerText="-";
@@ -299,7 +342,9 @@ function generateChart(){
     });
 
 }
-
+window.onload = function(){
+    createInitialRows();
+};
 </script>
 
 </body>
