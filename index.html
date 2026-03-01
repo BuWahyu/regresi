@@ -138,21 +138,69 @@ button{
     background:rgba(255,255,255,0.1);
 }
 .chart-container{
-    flex:1;
-    min-height:450px;
+    height:450px;   /* 🔥 tinggi tetap */
+}
+canvas{
+    width:100% !important;
+    height:100% !important;
 }
 @media(max-width:900px){
     .container{flex-direction:column}
     .left{width:100%}
 }
 .visitor-footer{
-    text-align:center;
-    padding:25px;
-    font-size:13px;
-    opacity:0.9;
+    display:flex;
+    justify-content:center;
+    padding:40px 20px;
 }
-.dark .visitor-footer{
-    color:#ffffff;
+
+.visitor-card{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    padding:20px 30px;
+    border-radius:18px;
+    background:rgba(255,255,255,0.9);
+    box-shadow:0 10px 30px rgba(0,0,0,0.15);
+    backdrop-filter:blur(10px);
+    transition:0.3s;
+}
+
+.dark .visitor-card{
+    background:rgba(30,41,59,0.9);
+}
+
+.visitor-icon{
+    font-size:28px;
+}
+
+.visitor-label{
+    font-size:13px;
+    opacity:0.8;
+}
+
+.visitor-number{
+    font-size:26px;
+    font-weight:700;
+    letter-spacing:1px;
+}
+.interpretation-box{
+    margin-top:20px;
+    padding:20px;
+    border-radius:14px;
+    background:rgba(0,0,0,0.05);
+    font-size:14px;
+    line-height:1.6;
+    display:none; /* 🔥 penting */
+}
+
+.dark .interpretation-box{
+    background:rgba(255,255,255,0.08);
+}
+
+.interpretation-box h3{
+    margin-top:0;
+    font-size:16px;
 }
 </style>
 </head>
@@ -166,7 +214,7 @@ button{
     </div>
     <div class="toggle-dark" onclick="toggleDark()">🌙 Dark Mode</div>
 </header>
-<div class="toggle-dark" onclick="toggleDark()">🌙 Dark Mode</div>
+
 
 <div class="container">
 
@@ -183,6 +231,7 @@ button{
 <button class="btn-green" onclick="addRow()">Tambah Data</button>
 <button class="btn-primary" onclick="generateChart()">Tampilkan Diagram</button>
 <button class="btn-reset" onclick="resetAll()">Reset</button>
+<button class="btn-primary" onclick="showInterpretation()">Lihat Interpretasi</button>
 
 <div class="stats">
 <div class="stat-box">Data: <span id="count">0</span></div>
@@ -200,6 +249,14 @@ Persamaan: <span id="equation">-</span>
 <h2>Visualisasi</h2>
 <div class="chart-container">
 <canvas id="scatterChart"></canvas>
+<!-- interpretasi -->
+<div class="interpretation-box" id="interpretationBox">
+    <h3>Interpretasi Diagram</h3>
+    <div id="interpretationContent">
+        Masukkan data dan tampilkan diagram untuk melihat interpretasi.
+    </div>
+</div>
+
 </div>
 </div>
 
@@ -209,6 +266,9 @@ Persamaan: <span id="equation">-</span>
 
 let chartInstance=null;
 let lastData=null;
+let lastSlope=null;
+let lastR2=null;
+
 function createInitialRows(){
     const tbody = document.querySelector("#dataTable tbody");
     tbody.innerHTML = "";
@@ -223,7 +283,6 @@ function createInitialRows(){
 }
 function toggleDark(){
     document.body.classList.toggle("dark");
-    if(lastData) generateChart();
 }
 
 function addRow(){
@@ -245,6 +304,50 @@ function resetAll(){
     lastData=null;
 }
 
+function generateInterpretation(slope, r2){
+
+    let direction = "";
+    let strength = "";
+
+    if(slope > 0){
+        direction = "Hubungan Positif (semakin X meningkat, Y cenderung meningkat)";
+    } else if(slope < 0){
+        direction = "Hubungan Negatif (semakin X meningkat, Y cenderung menurun)";
+    } else {
+        direction = "Tidak terlihat hubungan linear yang jelas";
+    }
+
+    if(r2 > 0.75){
+        strength = "Hubungan sangat kuat";
+    } else if(r2 > 0.4){
+        strength = "Hubungan sedang";
+    } else if(r2 > 0.1){
+        strength = "Hubungan lemah";
+    } else {
+        strength = "Hubungan sangat lemah atau hampir tidak ada";
+    }
+
+    return `
+        <strong>Arah Hubungan:</strong> ${direction}<br><br>
+        <strong>Kekuatan Hubungan:</strong> ${strength}<br><br>
+        <strong>Makna R²:</strong> Sekitar ${(r2*100).toFixed(1)}% variasi Y dapat dijelaskan oleh X.<br><br>
+        <strong>Pertanyaan Reflektif:</strong><br>
+        - Apakah titik-titik membentuk pola garis?<br>
+        - Apakah ada titik pencilan (outlier)?<br>
+        - Jika X naik 1 satuan, bagaimana perubahan rata-rata Y?
+    `;
+}
+function showInterpretation(){
+    if(lastSlope===null){
+        alert("Tampilkan diagram terlebih dahulu.");
+        return;
+    }
+
+    document.getElementById("interpretationContent").innerHTML =
+        generateInterpretation(lastSlope,lastR2);
+
+    document.getElementById("interpretationBox").style.display="block";
+}
 function generateChart(){
 
     const rows=document.querySelectorAll("#dataTable tbody tr");
@@ -282,6 +385,9 @@ function generateChart(){
     const intercept=(sumY-slope*sumX)/n;
     const r2=Math.pow((n*sumXY-sumX*sumY)/
         Math.sqrt((n*sumXX-sumX*sumX)*(n*sumYY-sumY*sumY)),2);
+    lastSlope = slope;
+lastR2 = r2;
+document.getElementById("interpretationBox").style.display="none";
 
     document.getElementById("count").innerText=n;
     document.getElementById("slope").innerText=slope.toFixed(4);
@@ -292,9 +398,11 @@ function generateChart(){
 
     const minX=Math.min(...data.map(p=>p.x));
     const maxX=Math.max(...data.map(p=>p.x));
-    const minY=Math.min(...data.map(p=>p.y));
-    const maxY=Math.max(...data.map(p=>p.y));
-    const padding=(maxY-minY)*0.1 || 1;
+    
+
+
+
+
 
     const regression=[
         {x:minX,y:slope*minX+intercept},
@@ -324,6 +432,7 @@ function generateChart(){
             ]
         },
         options:{
+            animation:false,  // 🔥 ini yang menghentikan grafik naik terus
             responsive:true,
             maintainAspectRatio:false,
             scales:{
@@ -335,13 +444,16 @@ function generateChart(){
                     grid:{color:gridColor}
                 },
                 y:{
-                    min:minY-padding,
-                    max:maxY+padding,
-                    ticks:{color:axisColor},
-                    title:{display:true,text:"Y",color:axisColor},
-                    grid:{color:gridColor}
-                }
+    beginAtZero:false,
+    ticks:{color:axisColor},
+    title:{display:true,text:"Y",color:axisColor},
+    grid:{color:gridColor}
+}
             },
+            interaction:{
+    mode:'nearest',
+    intersect:false
+},
             plugins:{
                 legend:{
                     labels:{color:axisColor}
@@ -351,16 +463,65 @@ function generateChart(){
     });
 
 }
+
+
 window.onload = function(){
     createInitialRows();
 };
 </script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+   apiKey: "AIzaSyDvS4TXiU9xZjaz_vMBB9DrXBupvNYwXSg",
+  authDomain: "regresi-counter.firebaseapp.com",
+  databaseURL: "https://regresi-counter-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "regresi-counter",
+  storageBucket: "regresi-counter.firebasestorage.app",
+  messagingSenderId: "91363432209",
+  appId: "1:91363432209:web:5b44642ed75ddadb899eb0"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const counterRef = ref(db, "visits");
+
+ function animateCounter(target){
+    let current = 0;
+    const duration = 800;
+    const increment = target / (duration / 16);
+
+    const timer = setInterval(() => {
+        current += increment;
+        if(current >= target){
+            current = target;
+            clearInterval(timer);
+        }
+
+        document.getElementById("visitorCount").innerText =
+            Math.floor(current).toLocaleString("id-ID");
+
+    }, 16);
+}
+
+get(counterRef).then((snapshot) => {
+    let current = snapshot.exists() ? snapshot.val() : 0;
+    current++;
+    set(counterRef, current);
+    animateCounter(current);
+});
+</script>
+
 <footer class="visitor-footer">
-    👥 Total Pengunjung:
-    <br>
-    <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://buwahyu.github.io/regresi/&count_bg=%233b82f6&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=visits&edge_flat=false"/>
+    <div class="visitor-card">
+        <div class="visitor-icon">👥</div>
+        <div class="visitor-info">
+            <div class="visitor-label">Total Pengunjung</div>
+            <div class="visitor-number" id="visitorCount">0</div>
+        </div>
+    </div>
 </footer>
 
 </body>
 </html>
-
