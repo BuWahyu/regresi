@@ -145,6 +145,17 @@ button{
     .container{flex-direction:column}
     .left{width:100%}
 }
+.visitor-footer{
+    text-align:center;
+    padding:20px;
+    font-size:13px;
+    opacity:0.85;
+    margin-top:40px;
+}
+
+.dark .visitor-footer{
+    color:#ffffff;
+}
 </style>
 </head>
 
@@ -345,6 +356,21 @@ function generateChart(){
 window.onload = function(){
     createInitialRows();
 };
+</script>
+<footer class="visitor-footer">
+    👥 Total Pengunjung:
+    <span id="visitorCount">Loading...</span>
+</footer>
+
+<script>
+fetch("https://visitorbadge.io/api/visitors?path=buwahyu.github.io/regresi")
+.then(response => response.json())
+.then(data => {
+    document.getElementById("visitorCount").innerText = data.total;
+})
+.catch(() => {
+    document.getElementById("visitorCount").innerText = "-";
+});
 </script>
 
 </body>
