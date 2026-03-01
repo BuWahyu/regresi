@@ -147,12 +147,10 @@ button{
 }
 .visitor-footer{
     text-align:center;
-    padding:20px;
+    padding:25px;
     font-size:13px;
-    opacity:0.85;
-    margin-top:40px;
+    opacity:0.9;
 }
-
 .dark .visitor-footer{
     color:#ffffff;
 }
@@ -359,19 +357,10 @@ window.onload = function(){
 </script>
 <footer class="visitor-footer">
     👥 Total Pengunjung:
-    <span id="visitorCount">Loading...</span>
+    <br>
+    <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://buwahyu.github.io/regresi/&count_bg=%233b82f6&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=visits&edge_flat=false"/>
 </footer>
-
-<script>
-fetch("https://visitorbadge.io/api/visitors?path=buwahyu.github.io/regresi")
-.then(response => response.json())
-.then(data => {
-    document.getElementById("visitorCount").innerText = data.total;
-})
-.catch(() => {
-    document.getElementById("visitorCount").innerText = "-";
-});
-</script>
 
 </body>
 </html>
+
