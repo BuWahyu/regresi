@@ -1,0 +1,339 @@
+* { box-sizing: border-box }
+
+body {
+    margin: 0;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    transition: .3s;
+    color: #1e293b;
+}
+
+.dark {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: white;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    color: white;
+}
+
+.header-left { display: flex; flex-direction: column; }
+
+.header-title { font-size: 28px; font-weight: 600; }
+
+.header-author { font-size: 14px; opacity: .85; margin-top: 4px; }
+
+/* ===============================
+   DARK MODE TOGGLE PREMIUM
+=============================== */
+
+.toggle-dark {
+    position: relative;
+    width: 70px;
+    height: 34px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #facc15, #f59e0b);
+    cursor: pointer;
+    transition: all .35s ease;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.25);
+}
+
+/* Knob */
+.toggle-dark::before {
+    content: "☀️";
+    position: absolute;
+    left: 4px;
+    width: 26px;
+    height: 26px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all .35s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,.2);
+}
+
+/* DARK ACTIVE */
+.dark .toggle-dark {
+    background: linear-gradient(135deg, #0f172a, #334155);
+}
+
+.dark .toggle-dark::before {
+    content: "🌙";
+    transform: translateX(36px);
+}
+
+.container {
+    display: flex;
+    gap: 25px;
+    padding: 25px;
+    max-width: 1300px;
+    margin: auto;
+}
+
+.panel {
+    background: rgba(255,255,255,.92);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,.15);
+}
+
+.dark .panel {
+    background: rgba(30,41,59,.92);
+}
+
+.left { width: 360px }
+.right { flex: 1; display: flex; flex-direction: column }
+
+table { width: 100%; border-collapse: collapse; margin-bottom: 10px }
+
+th {
+    background: #f1f5f9;
+    padding: 8px;
+    font-size: 12px;
+}
+
+.dark th { background: #334155 }
+
+td { padding: 6px }
+
+input {
+    width: 100%;
+    padding: 6px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+button {
+    width: 100%;
+    padding: 9px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+.btn-green { background: #10b981; color: white }
+.btn-primary { background: #2563eb; color: white }
+.btn-reset { background: #ef4444; color: white }
+
+.stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.stat-box {
+    background: rgba(0,0,0,.05);
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.dark .stat-box {
+    background: rgba(255,255,255,.1);
+}
+
+.interpretation-box {
+    margin: 15px 0;
+    padding: 15px;
+    border-radius: 14px;
+    background: rgba(0,0,0,.05);
+    font-size: 14px;
+}
+
+.dark .interpretation-box {
+    background: rgba(255,255,255,.08);
+}
+
+.chart-container { min-height: 350px }
+
+@media(max-width:900px){
+    .container { flex-direction: column }
+    .left { width: 100% }
+}
+
+.visitor-footer {
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.visitor-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px 30px;
+    border-radius: 18px;
+    background: rgba(255,255,255,.9);
+    box-shadow: 0 10px 30px rgba(0,0,0,.15);
+}
+
+.dark .visitor-card {
+    background: rgba(30,41,59,.9);
+}
+
+.visitor-number {
+    font-size: 26px;
+    font-weight: 700;
+}
+/* ===============================
+   POPUP QUOTE
+=============================== */
+
+.quote-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all .35s ease;
+}
+
+.quote-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.quote-modal {
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    padding: 30px 25px;
+    border-radius: 18px;
+    position: relative;
+    text-align: center;
+    transform: translateY(30px) scale(.95);
+    transition: all .35s ease;
+    box-shadow: 0 25px 60px rgba(0,0,0,.3);
+}
+
+.dark .quote-modal {
+    background: #1e293b;
+    color: white;
+}
+
+.quote-overlay.show .quote-modal {
+    transform: translateY(0) scale(1);
+}
+
+.quote-close {
+    position: absolute;
+    top: 12px;
+    right: 15px;
+    cursor: pointer;
+    font-size: 14px;
+    opacity: .6;
+}
+
+.quote-close:hover {
+    opacity: 1;
+}
+
+.quote-category {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    opacity: .7;
+    text-transform: uppercase;
+}
+
+.quote-text {
+    font-size: 15px;
+    line-height: 1.6;
+}
+/* HEADER */
+.quote-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.quote-icon {
+    font-size: 18px;
+}
+
+.quote-category {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* WARNA PER KATEGORI */
+.quote-modal.matematika {
+    border-top: 4px solid #3b82f6;
+}
+
+.quote-modal.motivasi {
+    border-top: 4px solid #10b981;
+}
+
+.quote-modal.humor {
+    border-top: 4px solid #f59e0b;
+}
+@keyframes iconBounce {
+    0%   { transform: scale(0.7) translateY(-8px); opacity: 0; }
+    50%  { transform: scale(1.1) translateY(2px); opacity: 1; }
+    70%  { transform: scale(0.95) translateY(-2px); }
+    100% { transform: scale(1) translateY(0); }
+}
+
+.quote-icon {
+    font-size: 20px;
+    display: inline-block;
+}
+
+.quote-icon.bounce {
+    animation: iconBounce .6s ease;
+}
+/* =========================
+   GRADIENT PER KATEGORI
+========================= */
+
+.quote-modal.matematika {
+    background: linear-gradient(135deg, #e0f2fe, #ffffff);
+    border-top: 4px solid #3b82f6;
+}
+
+.quote-modal.motivasi {
+    background: linear-gradient(135deg, #dcfce7, #ffffff);
+    border-top: 4px solid #10b981;
+}
+
+.quote-modal.humor {
+    background: linear-gradient(135deg, #fef3c7, #ffffff);
+    border-top: 4px solid #f59e0b;
+}
+
+/* DARK MODE VERSION */
+
+.dark .quote-modal.matematika {
+    background: linear-gradient(135deg, #1e3a8a, #1e293b);
+}
+
+.dark .quote-modal.motivasi {
+    background: linear-gradient(135deg, #065f46, #1e293b);
+}
+
+.dark .quote-modal.humor {
+    background: linear-gradient(135deg, #92400e, #1e293b);
+}
